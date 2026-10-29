@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>お部屋探しヒアリング｜ソラスム</title>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+  :root {
+    --brand: #1f4e8c;
+    --brand-light: #e8f0fa;
+    --accent: #4aa3df;
+    --text: #1d2433;
+    --muted: #6b7486;
+    --border: #d9dee7;
+    --chip: #f1f3f7;
+    --bg: #ffffff;
+    --danger: #d64545;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-text-size-adjust: 100%;
+  }
+  header {
+    background: linear-gradient(135deg, var(--brand), var(--accent));
+    color: #fff;
+    padding: 24px 20px 20px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 22px; }
+  header p { margin: 0; font-size: 14px; opacity: .92; }
+  .progress { margin-top: 14px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); overflow: hidden; }
+  .progress span { display: block; height: 100%; width: 0; background: #fff; transition: width .2s; }
+  main { padding: 8px 20px 40px; max-width: 640px; margin: 0 auto; }
+  .q { padding: 22px 0; border-bottom: 1px solid var(--border); }
+  .q h2 { margin: 0 0 4px; font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
+  .q h2 .no { color: var(--brand); font-weight: 700; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+  .badge.req { background: var(--brand); color: #fff; }
+  .badge.opt { background: var(--chip); color: var(--muted); }
+  .hint { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+  .group-label { font-size: 13px; color: var(--muted); margin: 12px 0 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1px solid var(--border);
+    background: var(--chip);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-size: 15px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: #fff; }
+  input[type=text], textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--text);
+  }
+  textarea { min-height: 96px; resize: vertical; }
+  .note { background: var(--brand-light); border-radius: 10px; padding: 14px 16px; font-size: 14px; margin: 22px 0 0; }
+  .error { color: var(--danger); font-size: 13px; margin-top: 6px; display: none; }
+  .submit {
+    width: 100%;
+    margin-top: 28px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--brand);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 16px;
+    cursor: pointer;
+  }
+  .submit:disabled { opacity: .5; }
+  .fallback { display: none; margin-top: 20px; }
+  .fallback pre { white-space: pre-wrap; background: var(--chip); padding: 14px; border-radius: 10px; font-size: 14px; }
+  .fine { font-size: 12px; color: var(--muted); margin-top: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>お部屋探しヒアリング</h1>
+  <p>ご希望を教えてください（1〜2分で終わります）。わからない項目は空欄のままで大丈夫です。</p>
+  <div class="progress"><span id="bar"></span></div>
+</header>
+
+<main>
+  <form id="form" novalidate>
+
+    <section class="q" data-key="時期">
+      <h2><span class="no">1</span>引っ越し希望時期</h2>
+      <div class="chips" data-single>
+        <button type="button" class="chip">1ヶ月以内</button>
+        <button type="button" class="chip">2〜3ヶ月以内</button>
+        <button type="button" class="chip">半年以内</button>
+        <button type="button" class="chip">良い物件があれば</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="人数">
+      <h2><span class="no">2</span>入居人数</h2>
+      <div class="chips" data-single>
+        <button type="button" class="chip">1人</button>
+        <button type="button" class="chip">2人</button>
+        <button type="button" class="chip">3人以上</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="エリア">
+      <h2><span class="no">3</span>住みたいエリア（複数OK）</h2>
+      <p class="group-label">都心</p>
+      <div class="chips">
+        <button type="button" class="chip">港区</button>
+        <button type="button" class="chip">渋谷区</button>
+        <button type="button" class="chip">目黒区</button>
+        <button type="button" class="chip">品川区</button>
+        <button type="button" class="chip">新宿区</button>
+        <button type="button" class="chip">世田谷区</button>
+      </div>
+      <p class="group-label">湾岸・武蔵小杉</p>
+      <div class="chips">
+        <button type="button" class="chip">江東区（豊洲・有明・東雲など）</button>
+        <button type="button" class="chip">川崎市（武蔵小杉など）</button>
+      </div>
+      <p class="group-label">その他</p>
+      <div class="chips">
+        <button type="button" class="chip">まだ決まっていない</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="物件タイプ">
+      <h2><span class="no">4</span>物件タイプ（複数OK）</h2>
+      <div class="chips">
+        <button type="button" class="chip">タワーマンション</button>
+        <button type="button" class="chip">高級分譲賃貸</button>
+        <button type="button" class="chip">新築</button>
+        <button type="button" class="chip">こだわらない</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="家賃">
+      <h2><span class="no">5</span>家賃の上限（管理費込み）</h2>
+      <div class="chips" data-single>
+        <button type="button" class="chip">15万円まで</button>
+        <button type="button" class="chip">20万円まで</button>
+        <button type="button" class="chip">25万円まで</button>
+        <button type="button" class="chip">30万円まで</button>
+        <button type="button" class="chip">40万円まで</button>
+        <button type="button" class="chip">50万円まで</button>
+        <button type="button" class="chip">50万円以上</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="間取り">
+      <h2><span class="no">6</span>間取り（複数OK）</h2>
+      <div class="chips">
+        <button type="button" class="chip">1R・1K</button>
+        <button type="button" class="chip">1LDK</button>
+        <button type="button" class="chip">2LDK</button>
+        <button type="button" class="chip">3LDK以上</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="広さ">
+      <h2><span class="no">7</span>広さ（専有面積）</h2>
+      <p class="hint">「この広さ以上」で探します</p>
+      <div class="chips" data-single>
+        <button type="button" class="chip">こだわらない</button>
+        <button type="button" class="chip">30㎡以上</button>
+        <button type="button" class="chip">40㎡以上</button>
+        <button type="button" class="chip">50㎡以上</button>
+        <button type="button" class="chip">60㎡以上</button>
+        <button type="button" class="chip">70㎡以上</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="駅徒歩">
+      <h2><span class="no">8</span>駅徒歩</h2>
+      <div class="chips" data-single>
+        <button type="button" class="chip">5分以内</button>
+        <button type="button" class="chip">7分以内</button>
+        <button type="button" class="chip">10分以内</button>
+        <button type="button" class="chip">15分以内</button>
+        <button type="button" class="chip">こだわらない</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="こだわり">
+      <h2><span class="no">9</span>こだわり条件（複数OK）</h2>
+      <div class="chips">
+        <button type="button" class="chip">高層階</button>
+        <button type="button" class="chip">眺望・夜景</button>
+        <button type="button" class="chip">コンシェルジュ</button>
+        <button type="button" class="chip">ジム・ラウンジ</button>
+        <button type="button" class="chip">内廊下</button>
+        <button type="button" class="chip">駐車場</button>
+        <button type="button" class="chip">ペット可</button>
+        <button type="button" class="chip">SOHO・事務所利用</button>
+        <button type="button" class="chip">初期費用を抑えたい</button>
+        <button type="button" class="chip">フリーレント希望</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="職業・契約形態">
+      <h2><span class="no">10</span>ご職業・契約形態</h2>
+      <div class="chips" data-single>
+        <button type="button" class="chip">会社員</button>
+        <button type="button" class="chip">公務員</button>
+        <button type="button" class="chip">自営業・フリーランス</button>
+        <button type="button" class="chip">法人代表（設立1年以上）</button>
+        <button type="button" class="chip">法人代表（設立1年未満）</button>
+        <button type="button" class="chip">法人契約を希望</button>
+        <button type="button" class="chip">芸能・クリエイター</button>
+        <button type="button" class="chip">その他</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="審査で気になること">
+      <h2><span class="no">11</span>審査で気になること（複数OK）<span class="badge opt">任意</span></h2>
+      <p class="hint">申し込みやすいお部屋選びの参考にします</p>
+      <div class="chips">
+        <button type="button" class="chip">設立して間もない</button>
+        <button type="button" class="chip">赤字決算</button>
+        <button type="button" class="chip">収入が不定期</button>
+        <button type="button" class="chip">勤続年数が短い</button>
+        <button type="button" class="chip">外国籍</button>
+        <button type="button" class="chip">特になし</button>
+      </div>
+    </section>
+
+    <section class="q" data-key="その他ご要望" data-text>
+      <h2><span class="no">12</span>その他ご要望（自由記入）</h2>
+      <textarea placeholder="例：職場は六本木で通勤20分以内が希望／小型犬1匹"></textarea>
+    </section>
+
+    <p class="note">最後に、物件をご案内するためのお名前を教えてください（担当者以外には公開しません）</p>
+
+    <section class="q" data-key="お名前" data-text data-required>
+      <h2><span class="no">13</span>お名前<span class="badge req">必須</span></h2>
+      <input type="text" placeholder="山田 花子" autocomplete="name">
+      <p class="error">お名前を入力してください</p>
+    </section>
+
+    <section class="q" data-key="フリガナ" data-text>
+      <h2><span class="no">14</span>フリガナ</h2>
+      <input type="text" placeholder="ヤマダ ハナコ">
+    </section>
+
+    <button type="submit" class="submit" id="submit">送信する</button>
+    <p class="fine">※いただいた情報はお部屋探しのご提案にのみ使用します。<br>※送信すると、ご希望条件がこのLINEのトークに送られます。</p>
+
+    <div class="fallback" id="fallback">
+      <p>LINEアプリの外で開かれているため、自動で送信できませんでした。下の内容をコピーして、LINEのトークに貼り付けて送ってください。</p>
+      <pre id="fallbackText"></pre>
+    </div>
+  </form>
+</main>
+
+<script>
+  // LINE Developersで発行したLIFF IDに置き換える
+  const LIFF_ID = "ここにLIFF_IDを入れる";
+
+  const sections = [...document.querySelectorAll(".q")];
+  let liffReady = false;
+
+  document.querySelectorAll(".chips").forEach(group => {
+    const single = group.hasAttribute("data-single");
+    group.addEventListener("click", e => {
+      const chip = e.target.closest(".chip");
+      if (!chip) return;
+      const on = chip.getAttribute("aria-pressed") === "true";
+      if (single) group.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", "false"));
+      chip.setAttribute("aria-pressed", on ? "false" : "true");
+      updateProgress();
+    });
+  });
+  document.querySelectorAll("input, textarea").forEach(el => el.addEventListener("input", updateProgress));
+
+  function answerOf(section) {
+    if (section.hasAttribute("data-text")) {
+      return section.querySelector("input, textarea").value.trim();
+    }
+    return [...section.querySelectorAll('.chip[aria-pressed="true"]')].map(c => c.textContent.trim()).join("、");
+  }
+
+  function updateProgress() {
+    const answered = sections.filter(s => answerOf(s)).length;
+    document.getElementById("bar").style.width = Math.round(answered / sections.length * 100) + "%";
+  }
+
+  function buildMessage() {
+    const lines = ["【お部屋探しの希望条件】"];
+    sections.forEach(s => {
+      const key = s.dataset.key;
+      if (key === "お名前" || key === "フリガナ") return;
+      const v = answerOf(s);
+      if (v) lines.push("・" + key + "：" + v);
+    });
+    const name = answerOf(sections.find(s => s.dataset.key === "お名前"));
+    const kana = answerOf(sections.find(s => s.dataset.key === "フリガナ"));
+    lines.push("・お名前：" + name + (kana ? "（" + kana + "）" : ""));
+    return lines.join("\n");
+  }
+
+  document.getElementById("form").addEventListener("submit", async e => {
+    e.preventDefault();
+    const nameSection = sections.find(s => s.dataset.key === "お名前");
+    const err = nameSection.querySelector(".error");
+    if (!answerOf(nameSection)) {
+      err.style.display = "block";
+      nameSection.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    err.style.display = "none";
+
+    const text = buildMessage();
+    const btn = document.getElementById("submit");
+    btn.disabled = true;
+
+    if (liffReady && liff.isInClient()) {
+      try {
+        await liff.sendMessages([
+          { type: "text", text: text.slice(0, 5000) },
+          { type: "text", text: "ヒアリング回答しました" }
+        ]);
+        liff.closeWindow();
+        return;
+      } catch (ex) {
+        btn.disabled = false;
+        alert("送信できませんでした。お手数ですが、もう一度お試しください。");
+        return;
+      }
+    }
+    // LINEアプリ外で開いた場合：コピーして送ってもらう
+    document.getElementById("fallbackText").textContent = text;
+    document.getElementById("fallback").style.display = "block";
+    document.getElementById("fallback").scrollIntoView({ behavior: "smooth" });
+    btn.disabled = false;
+  });
+
+  liff.init({ liffId: LIFF_ID })
+    .then(() => { liffReady = true; })
+    .catch(() => { liffReady = false; });
+</script>
+</body>
+</html>
