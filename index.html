@@ -34,8 +34,20 @@
   }
   header h1 { margin: 0 0 6px; font-size: 22px; }
   header p { margin: 0; font-size: 14px; opacity: .92; }
-  .progress { margin-top: 14px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); overflow: hidden; }
-  .progress span { display: block; height: 100%; width: 0; background: #fff; transition: width .2s; }
+  .progress-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress { flex: 1; height: 6px; border-radius: 3px; background: var(--chip); overflow: hidden; }
+  .progress span { display: block; height: 100%; width: 0; background: var(--brand); transition: width .2s; }
+  .progress-count { font-size: 13px; color: var(--muted); white-space: nowrap; }
   main { padding: 8px 20px 40px; max-width: 640px; margin: 0 auto; }
   .q { padding: 22px 0; border-bottom: 1px solid var(--border); }
   .q h2 { margin: 0 0 4px; font-size: 17px; display: flex; align-items: baseline; gap: 8px; }
@@ -92,8 +104,11 @@
 <header>
   <h1>お部屋探しヒアリング</h1>
   <p>ご希望を教えてください（1〜2分で終わります）。わからない項目は空欄のままで大丈夫です。</p>
-  <div class="progress"><span id="bar"></span></div>
 </header>
+<div class="progress-bar">
+  <div class="progress"><span id="bar"></span></div>
+  <span class="progress-count" id="count">0 / 14 回答</span>
+</div>
 
 <main>
   <form id="form" novalidate>
@@ -297,6 +312,7 @@
   function updateProgress() {
     const answered = sections.filter(s => answerOf(s)).length;
     document.getElementById("bar").style.width = Math.round(answered / sections.length * 100) + "%";
+    document.getElementById("count").textContent = answered + " / " + sections.length + " 回答";
   }
 
   function buildMessage() {
@@ -338,7 +354,9 @@
         return;
       } catch (ex) {
         btn.disabled = false;
-        alert("送信できませんでした。お手数ですが、もう一度お試しください。");
+        const ctx = liff.getContext();
+        alert("送信できませんでした。お手数ですが、もう一度お試しください。\n（エラー：" +
+          (ex.code || "") + " " + (ex.message || "") + " / " + (ctx ? ctx.type : "-") + "）");
         return;
       }
     }
